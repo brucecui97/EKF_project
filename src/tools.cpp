@@ -11,9 +11,7 @@ Tools::~Tools() {}
 
 VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
                               const vector<VectorXd> &ground_truth) {
-  std::cout<<"bc rmse ran"<<std::endl;
- VectorXd rmse(estimations.size());
-  rmse << 0,0,0,0;
+ VectorXd rmse = VectorXd::Zero(estimations[0].size());
 
   // check the validity of the following inputs:
   //  * the estimation vector size should not be zero
