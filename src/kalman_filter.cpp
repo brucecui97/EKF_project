@@ -1,4 +1,5 @@
 #include "kalman_filter.h"
+#include <iostream>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -23,15 +24,29 @@ void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
 }
 
 void KalmanFilter::Predict() {
-  /**
-   * TODO: predict the state
-   */
+  std::cout<<"prdcit was called"<<std::endl;
+  std::cout<<"This is F"<<F_<<std::endl;
+   //std::cout<<"This is x_"<<x_<<std::endl;
+  x_ = F_*x_;
+ 
+  P_=F_*P_*F_.transpose() +Q_;
+
 }
 
 void KalmanFilter::Update(const VectorXd &z) {
   /**
    * TODO: update the state by using Kalman Filter equations
-   */
+   
+  std::cout<<"Kalman update was called"<<std::endl;
+  VectorXd y = z - H_*x_;
+  MatrixXd S = H_*P_*H_.transpose() + R_;
+  MatrixXd K = P_*H_.transpose()*S.inverse();
+  x_ = x_ + K*y;
+
+  int size = (K*H_).rows();
+  MatrixXd I = MatrixXd::Identity(size,size);
+  P_ = (I-K*H_)*P_;
+  */
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
