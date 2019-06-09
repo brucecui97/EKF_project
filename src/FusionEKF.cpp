@@ -60,12 +60,21 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      */
     float prev_t =  measurement_pack.timestamp_;//can optimize
     float dt = 500000.0/ 1000000.0;
-    std::cout<<"Dt is "<<dt<<std::endl;
+    
     MatrixXd F(4,4);
       F<< 1,0,dt,0,
           0,1,0,dt,
           0,0,1,0,
           0,0,0,1;
+ std::cout<<"F is "<<F<<std::endl;   
+        MatrixXd Q(4,4);
+    
+float noise_a = 9;
+    Q<<pow(dt,4)/4*pow(noise_a,2),0,pow(dt,3)/2*pow(noise_a,2),0,
+      0,pow(dt,4)/4*pow(noise_a,2),0,pow(dt,3)/2*pow(noise_a,2),
+      pow(dt,3)/2*pow(noise_a,2),0,pow(dt,2)*pow(noise_a,2),0,
+      0,pow(dt,3)/2*pow(noise_a,2),0,pow(dt,2)*pow(noise_a,2);
+    std::cout<<"Q is "<<Q<<std::endl;
      
     // first measurement
     cout << "EKF: " << endl;
@@ -75,13 +84,24 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       // TODO: Convert radar from polar to cartesian coordinates 
       //         and initialize state.
+      
 
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       // TODO: Initialize state.
       VectorXd y = measurement_pack.raw_measurements_ - H_laser_*ekf_.x_;
-      ekf_.x_[0]=y[0];
-      ekf_.x_[1]=y[1];
+      MatrixXd P_ = MatrixXd::Identity(4,4)*100;
+     
+      MatrixXd S = H_laser_*P_*H_laser_.transpose() + R_laser_;
+      MatrixXd K = P_*H_laser_.transpose()*S.inverse();
+      ekf_.x_ = ekf_.x_+ K*y;
+
+      int size = (K*H_laser_).rows();
+      MatrixXd I = MatrixXd::Identity(size,size);
+      P_ = (I-K*H_laser_)*P_;
+
+      ekf_.Init(ekf_.x_,P_,F,H_laser_,R_laser_,Q);
+ 
     }
 
     // done initializing, no need to predict or update
