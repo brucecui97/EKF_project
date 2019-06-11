@@ -34,9 +34,7 @@ void KalmanFilter::Predict() {
 }
 
 void KalmanFilter::Update(const VectorXd &z) {
-  /**
-   * TODO: update the state by using Kalman Filter equations
-   
+  
   std::cout<<"Kalman update was called"<<std::endl;
   VectorXd y = z - H_*x_;
   MatrixXd S = H_*P_*H_.transpose() + R_;
@@ -46,7 +44,7 @@ void KalmanFilter::Update(const VectorXd &z) {
   int size = (K*H_).rows();
   MatrixXd I = MatrixXd::Identity(size,size);
   P_ = (I-K*H_)*P_;
-  */
+  
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {

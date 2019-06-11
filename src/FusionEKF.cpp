@@ -52,24 +52,27 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    * Initialization
    */
   //std::cout<<"bc this is measurement pack"<<measurement_pack.raw_measurements_ <<"with time stamp"<< measurement_pack.timestamp_<<std::endl;
+  MatrixXd F(4,4);
+  MatrixXd Q(4,4);
+  float noise_a = 9;
   if (!is_initialized_) {
     /**
      * TODO: Initialize the state ekf_.x_ with the first measurement.
      * TODO: Create the covariance matrix.
      * You'll need to convert radar from polar to cartesian coordinates.
      */
-    float prev_t =  measurement_pack.timestamp_;//can optimize
-    float dt = 500000.0/ 1000000.0;
+    ekf_.prev_t =  measurement_pack.timestamp_ - 500000;//can optimize
+    float dt = 50000.0/ 1000000.0;
     
-    MatrixXd F(4,4);
+    
       F<< 1,0,dt,0,
           0,1,0,dt,
           0,0,1,0,
           0,0,0,1;
  std::cout<<"F is "<<F<<std::endl;   
-        MatrixXd Q(4,4);
+  
     
-float noise_a = 9;
+
     Q<<pow(dt,4)/4*pow(noise_a,2),0,pow(dt,3)/2*pow(noise_a,2),0,
       0,pow(dt,4)/4*pow(noise_a,2),0,pow(dt,3)/2*pow(noise_a,2),
       pow(dt,3)/2*pow(noise_a,2),0,pow(dt,2)*pow(noise_a,2),0,
@@ -119,8 +122,28 @@ float noise_a = 9;
    * TODO: Update the process noise covariance matrix.
    * Use noise_ax = 9 and noise_ay = 9 for your Q matrix.
    */
-
+   std::cout<<"bc prev t is"<<ekf_.prev_t<<std::endl;
+   std::cout<<"bc current t is"<<measurement_pack.timestamp_<<std::endl;
+  float dt = (measurement_pack.timestamp_-ekf_.prev_t)/float(1000000);
+  std::cout<<"bc current dt is"<<dt<<std::endl;
+  ekf_.prev_t = measurement_pack.timestamp_;
+  
+        F<< 1,0,dt,0,
+          0,1,0,dt,
+          0,0,1,0,
+          0,0,0,1;
+  
+      Q<<pow(dt,4)/4*pow(noise_a,2),0,pow(dt,3)/2*pow(noise_a,2),0,
+      0,pow(dt,4)/4*pow(noise_a,2),0,pow(dt,3)/2*pow(noise_a,2),
+      pow(dt,3)/2*pow(noise_a,2),0,pow(dt,2)*pow(noise_a,2),0,
+      0,pow(dt,3)/2*pow(noise_a,2),0,pow(dt,2)*pow(noise_a,2);
+  
+  ekf_.F_ =F;
+  ekf_.Q_ =Q;
+ 
   ekf_.Predict();
+  
+
 
   /**
    * Update
@@ -137,6 +160,7 @@ float noise_a = 9;
 
   } else {
     // TODO: Laser updates
+    ekf_.Update(measurement_pack.raw_measurements_);
 
   }
 
