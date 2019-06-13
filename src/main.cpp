@@ -49,6 +49,7 @@ int main() {
     if (length && length > 2 && data[0] == '4' && data[1] == '2') {
       auto s = hasData(string(data));
 
+
       if (s != "") {
         auto j = json::parse(s);
 
@@ -108,6 +109,8 @@ int main() {
           ground_truth.push_back(gt_values);
           
           // Call ProcessMeasurement(meas_package) for Kalman filter
+          std::cout<<"bruce"<<std::endl;
+          std::cout<<meas_package.raw_measurements_<<std::endl;
           fusionEKF.ProcessMeasurement(meas_package);       
 
           // Push the current estimated x,y positon from the Kalman filter's 

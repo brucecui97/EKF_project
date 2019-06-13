@@ -2,6 +2,7 @@
 #define KALMAN_FILTER_H_
 
 #include "Eigen/Dense"
+#include <math.h>   
 
 class KalmanFilter {
  public:
@@ -63,6 +64,7 @@ class KalmanFilter {
 
   // measurement covariance matrix
   Eigen::MatrixXd R_;
+  long prev_t;
 };
 
 #endif // KALMAN_FILTER_H_
