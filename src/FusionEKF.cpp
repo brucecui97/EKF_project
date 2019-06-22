@@ -62,7 +62,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      * You'll need to convert radar from polar to cartesian coordinates.
      */
     ekf_.prev_t =  measurement_pack.timestamp_ - 500000;//can optimize
-    double dt = 50000.0/ 1000000.0;
+   long double dt = 50000.0/ 1000000.0;
     
     
       F<< 1,0,dt,0,
@@ -71,8 +71,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
           0,0,0,1;
  std::cout<<"F is "<<F<<std::endl;   
   
-    
-
     Q<<pow(dt,4)/4*pow(noise_a,2),0,pow(dt,3)/2*pow(noise_a,2),0,
       0,pow(dt,4)/4*pow(noise_a,2),0,pow(dt,3)/2*pow(noise_a,2),
       pow(dt,3)/2*pow(noise_a,2),0,pow(dt,2)*pow(noise_a,2),0,
@@ -88,13 +86,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       // TODO: Convert radar from polar to cartesian coordinates 
       //         and initialize state.
 
-  if (measurement_pack.raw_measurements_[0]>0.05 && measurement_pack.raw_measurements_[1]>0.05){
+ 
   MatrixXd Hj = tools.CalculateJacobian(ekf_.x_);
 
-  double px = ekf_.x_[0];
-  double py = ekf_.x_[1];
-  double vx = ekf_.x_[2];
-  double vy = ekf_.x_[3];
+  long double px = ekf_.x_[0];
+  long double py = ekf_.x_[1];
+  long double vx = ekf_.x_[2];
+  long double vy = ekf_.x_[3];
    
   VectorXd hx(3);
     
@@ -102,31 +100,42 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   hx[1] = atan2(double(py),double(px));
   hx[2] = (px*vx+py*vy)/sqrt(pow(px,2)+pow(py,2));
   std::cout<<hx[1]<<std::endl;
-    MatrixXd P_ = MatrixXd::Identity(4,4)*100;
+    MatrixXd P_(4,4);
+      P_<<1,0,0,0,
+    	0,1,0,0,
+    	0,0,100,0,
+    	0,0,0,100;
 
   VectorXd y = measurement_pack.raw_measurements_ - hx;
     
-while (y(1) > 3.1415926) {
-    y(1) -= 3.1415926;
+while (y(1) > M_PI) {
+    y(1) -= M_PI;
 }
-while (y(1) < -3.1415926) {
-    y(1) += 3.1415926;
+while (y(1) < -M_PI) {
+    y(1) += M_PI;
 }
   MatrixXd S = Hj*P_*Hj.transpose() + R_radar_;
   MatrixXd K = P_*Hj.transpose()*S.inverse();
+  //ekf_.x_ = ekf_.x_ + K*y;
   ekf_.x_ = ekf_.x_ + K*y;
 
   int size = (K*Hj).rows();
   MatrixXd I = MatrixXd::Identity(size,size);
   P_ = (I-K*Hj)*P_;
    ekf_.Init(ekf_.x_,P_,F,H_laser_,R_radar_,Q);
+    
+   std::cout<<'bc initailzied with radar correctly'<<std::endl;
   
     }
-    }
+    
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       // TODO: Initialize state.
       VectorXd y = measurement_pack.raw_measurements_ - H_laser_*ekf_.x_;
-      MatrixXd P_ = MatrixXd::Identity(4,4)*100;
+          MatrixXd P_(4,4);
+      P_<<1,0,0,0,
+    	0,1,0,0,
+    	0,0,100,0,
+    	0,0,0,100;
      
       MatrixXd S = H_laser_*P_*H_laser_.transpose() + R_laser_;
       MatrixXd K = P_*H_laser_.transpose()*S.inverse();
@@ -138,8 +147,8 @@ while (y(1) < -3.1415926) {
 
       ekf_.Init(ekf_.x_,P_,F,H_laser_,R_laser_,Q);
  
+    
     }
-
     // done initializing, no need to predict or update
     is_initialized_ = true;
     return;
@@ -157,24 +166,27 @@ while (y(1) < -3.1415926) {
    */
   // std::cout<<"bc prev t is"<<ekf_.prev_t<<std::endl;
   // std::cout<<"bc current t is"<<measurement_pack.timestamp_<<std::endl;
-  double dt = (measurement_pack.timestamp_-ekf_.prev_t)/double(1000000);
+  long double dt = (measurement_pack.timestamp_-ekf_.prev_t)/double(1000000.0);
   //std::cout<<"bc current dt is"<<dt<<std::endl;
   ekf_.prev_t = measurement_pack.timestamp_;
-  
+  std::cout<<"this is dt"<<dt;
         F<< 1,0,dt,0,
           0,1,0,dt,
           0,0,1,0,
           0,0,0,1;
   
-      Q<<pow(dt,4)/4*pow(noise_a,2),0,pow(dt,3)/2*pow(noise_a,2),0,
-      0,pow(dt,4)/4*pow(noise_a,2),0,pow(dt,3)/2*pow(noise_a,2),
-      pow(dt,3)/2*pow(noise_a,2),0,pow(dt,2)*pow(noise_a,2),0,
-      0,pow(dt,3)/2*pow(noise_a,2),0,pow(dt,2)*pow(noise_a,2);
+      Q<<pow(dt,4)/4.0*pow(noise_a,2),0,pow(dt,3)/2.0*pow(noise_a,2),0,
+      0,pow(dt,4)/4.0*pow(noise_a,2),0,pow(dt,3)/2.0*pow(noise_a,2),
+      pow(dt,3)/2.0*pow(noise_a,2),0,pow(dt,2)*pow(noise_a,2),0,
+      0,pow(dt,3)/2.0*pow(noise_a,2),0,pow(dt,2)*pow(noise_a,2);
   
+  std::cout<<Q<<std::endl;
   ekf_.F_ =F;
   ekf_.Q_ =Q;
  
+  std::cout<<"ekf P is "<<ekf_.P_<<std::endl;
   ekf_.Predict();
+    std::cout<<"bc right after predict"<<std::endl;
   
 
 
@@ -201,6 +213,6 @@ while (y(1) < -3.1415926) {
   }
 
   // print the output
-  cout << "x_ = " << ekf_.x_ << endl;
-  cout << "P_ = " << ekf_.P_ << endl;
+  //cout << "x_ = " << ekf_.x_ << endl;
+  //cout << "P_ = " << ekf_.P_ << endl;
 }

@@ -46,15 +46,15 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 
   MatrixXd H(3,4);
   
-  float px = x_state[0];
-  float py = x_state[1];
-  float vx = x_state[2];
-  float vy = x_state[3];
+ long double px = x_state[0];
+ long double py = x_state[1];
+ long double vx = x_state[2];
+ long double vy = x_state[3];
   
   H<< px/sqrt(pow(px,2)+pow(py,2)), py/sqrt(pow(px,2)+pow(py,2)),0,0,
        -py/sqrt(pow(px,2)+pow(py,2)), px/sqrt(pow(px,2)+pow(py,2)),0,0,
       py*(vx*py-vy*px)/(pow((pow(px,2)+pow(py,2)),1.5)),px*(vy*px-vx*py)/(pow((pow(px,2)+pow(py,2)),1.5)), px/sqrt(pow(px,2)+pow(py,2)),py/sqrt(pow(px,2)+pow(py,2));
 
-  std::cout<<H<<std::endl;
+  //std::cout<<H<<std::endl;
   return H;
 }

@@ -71,8 +71,8 @@ int main() {
           if (sensor_type.compare("L") == 0) {
             meas_package.sensor_type_ = MeasurementPackage::LASER;
             meas_package.raw_measurements_ = VectorXd(2);
-            float px;
-            float py;
+           long double px;
+           long double py;
             iss >> px;
             iss >> py;
             meas_package.raw_measurements_ << px, py;
@@ -81,9 +81,9 @@ int main() {
           } else if (sensor_type.compare("R") == 0) {
             meas_package.sensor_type_ = MeasurementPackage::RADAR;
             meas_package.raw_measurements_ = VectorXd(3);
-            float ro;
-            float theta;
-            float ro_dot;
+           long double ro;
+           long double theta;
+           long double ro_dot;
             iss >> ro;
             iss >> theta;
             iss >> ro_dot;
@@ -92,10 +92,10 @@ int main() {
             meas_package.timestamp_ = timestamp;
           }
 
-          float x_gt;
-          float y_gt;
-          float vx_gt;
-          float vy_gt;
+         long double x_gt;
+         long double y_gt;
+         long double vx_gt;
+         long double vy_gt;
           iss >> x_gt;
           iss >> y_gt;
           iss >> vx_gt;
@@ -118,10 +118,10 @@ int main() {
 
           VectorXd estimate(4);
 
-          double p_x = fusionEKF.ekf_.x_(0);
-          double p_y = fusionEKF.ekf_.x_(1);
-          double v1  = fusionEKF.ekf_.x_(2);
-          double v2 = fusionEKF.ekf_.x_(3);
+         long double p_x = fusionEKF.ekf_.x_(0);
+         long double p_y = fusionEKF.ekf_.x_(1);
+         long double v1  = fusionEKF.ekf_.x_(2);
+         long double v2 = fusionEKF.ekf_.x_(3);
 
           estimate(0) = p_x;
           estimate(1) = p_y;
